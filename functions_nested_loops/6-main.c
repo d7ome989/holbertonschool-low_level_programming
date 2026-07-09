@@ -7,8 +7,8 @@
  */
 int main(void)
 {
-	printf("%d\n", _abs(5));
-	printf("%d\n", _abs(0));
-	printf("%d\n", _abs(-77));
+	printf("%d\n", print_last_digit(98));
+	printf("%d\n", print_last_digit(0));
+	printf("%d\n", print_last_digit('9'));
 	return (0);
 }
