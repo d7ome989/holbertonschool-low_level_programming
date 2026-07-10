@@ -7,31 +7,38 @@
  */
 void times_table(void)
 {
-	int hou;
-	int mun;
-	int result;
+	int n;
+	int m;
+	int p;
 
-	for (hou = 0; hou <= 9; hou++)
+	n = 0;
+	while (n <= 9)
 	{
-		for (mun = 0; mun <= 9; mun++)
+		m = 0;
+		while (m <= 9)
 		{
-			result = hou * mun;
-
-			if (result >= 10)
+			p = n * m;
+			if (m == 0)
 			{
-				_putchar(result / 10 + '0');
-			}
-			_putchar(result % 10 + '0');
-
-			if (mun == 9)
-			{
-				_putchar('\n');
+				_putchar(p + '0');
 			}
 			else
 			{
 				_putchar(',');
 				_putchar(' ');
+				if (p < 10)
+				{
+					_putchar(' ');
+				}
+				else
+				{
+					_putchar((p / 10) + '0');
+				}
+				_putchar((p % 10) + '0');
 			}
+			m++;
 		}
+		_putchar('\n');
+		n++;
 	}
 }
