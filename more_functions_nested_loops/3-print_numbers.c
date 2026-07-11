@@ -1,18 +1,15 @@
 #include "main.h"
-
 /**
- * mul - multiplies two integers
- * @a: the first integer
- * @b: the second integer
- *
- * Return: the product of a and b
+ * print_numbers - prints numbers from 0 to 9 followed by a new line
+ * Return: void
  */
 void print_numbers(void)
 {
 	int i;
-	for(i = 0; i <= 9; i++ )
+
+	for (i = 0; i <= 9; i++)
 	{
-		_putchar( i + '0');
+		_putchar(i + '0');
 	}
 	_putchar('\n');
 }
