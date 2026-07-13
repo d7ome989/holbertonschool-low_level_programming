@@ -53,53 +53,42 @@ static unsigned long reduce_checksum(void)
 int main(void)
 {
     unsigned long checksum;
+    clock_t start;
+    clock_t end;
+    clock_t total_start;
+    clock_t total_end;
+    float total_sec;
+    float build_data_sec;
+    float process_sec;
+    float reduce_sec;
 
-    /* Students must add clock-based timing and print required lines. */
+    total_start = clock();
 
+    start = clock();
     build_dataset();
+    end = clock();
+    build_data_sec = (float)(end - start) / CLOCKS_PER_SEC;
+
+    start = clock();
     process_dataset();
+    end = clock();
+    process_sec = (float)(end - start) / CLOCKS_PER_SEC;
+
+    start = clock();
     checksum = reduce_checksum();
+    end = clock();
+    reduce_sec = (float)(end - start) / CLOCKS_PER_SEC;
+
+    total_end = clock();
+    total_sec = (float)(total_end - total_start) / CLOCKS_PER_SEC;
 
     if (checksum == 0ul)
         printf("impossible\n");
-	clock_t start, end;
-	clock_t total_start, total_end; /* أو يمكنك استخدام start و end للكل إذا كنت حذراً */
-	float total_sec;
-	float build_data_sec;
-	float process_sec;
-	float reduce_sec;
-	total_start = clock();
-	start = clock();
-	build_dataset();
-	end = clock();
-	build_data_sec = (float)(end - start) / CLOCKS_PER_SEC;
-	end = clock();
-    	start = clock();
-    	process_dataset();
-    	end = clock();
-    	process_sec = (float)(end - start) / CLOCKS_PER_SEC;
 
-    	start = clock();
-    	checksum = reduce_checksum();
-    	end = clock();
-    	reduce_sec = (float)(end - start) / CLOCKS_PER_SEC;
-
-    	total_end = clock();
-    	total_sec = (float)(total_end - total_start) / CLOCKS_PER_SEC;
-
-
-    /* 4. طباعة النتائج حسب العقد والمسميات المطلوبة حرفياً */
-    	printf("TOTAL seconds: %.6f\n", total_sec);
-    	printf("BUILD_DATA seconds: %.6f\n", build_data_sec);
-    	printf("PROCESS seconds: %.6f\n", process_sec);
-    	printf("REDUCE seconds: %.6f\n", reduce_sec);
-
-    /* Required output (exact format, no extra lines):
-     * TOTAL seconds: <float>
-     * BUILD_DATA seconds: <float>
-     * PROCESS seconds: <float>
-     * REDUCE seconds: <float>
-     */
+    printf("TOTAL seconds: %.6f\n", total_sec);
+    printf("BUILD_DATA seconds: %.6f\n", build_data_sec);
+    printf("PROCESS seconds: %.6f\n", process_sec);
+    printf("REDUCE seconds: %.6f\n", reduce_sec);
 
     return 0;
 }
