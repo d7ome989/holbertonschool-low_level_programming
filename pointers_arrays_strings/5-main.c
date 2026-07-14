@@ -1,4 +1,5 @@
 #include "main.h"
+#include <stdio.h>
 
 /**
  * main - check the code
@@ -7,9 +8,10 @@
  */
 int main(void)
 {
-    char *str;
+    char s[6] = "tomato";
 
-    str = "Holberton!";
-    print_rev(str);
+    printf("%s\n", s);
+    rev_string(s);
+    printf("%s\n", s);
     return (0);
 }
