@@ -54,8 +54,15 @@ int main()
                 scanf("%d", &a);
                 printf("ok pless enter second number .\n");
                 scanf("%d", &b);
-                result = a / b;
-                printf("result is %d\n ", result);
+		if (b == 0)
+		{
+			printf("Error: division by zero");
+		}
+		else
+		{
+                	result = a / b;
+                	printf("result is %d\n ", result);
+		}
         }
 	else
 	{
