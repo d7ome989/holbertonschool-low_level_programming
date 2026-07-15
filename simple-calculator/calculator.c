@@ -15,6 +15,10 @@ int main()
 	{
 		printf("bye!\n");
 	}
+	else
+	{
+		printf("Invalid choice");
+	}
 	return 0;
 
 }
