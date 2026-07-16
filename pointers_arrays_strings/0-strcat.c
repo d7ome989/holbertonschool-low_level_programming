@@ -1,6 +1,5 @@
-#include "main.h"
+#include "main.h" 
 /**
- * _strcpy - copies the string pointed to by src to dest
  * @dest: the destination buffer
  * @src: the source string
  *
@@ -8,14 +7,18 @@
  */
 char *_strcat(char *dest, char *src)
 {
-        int i;
 
-        for (i = 0; src[i] != '\0'; i++)
+        int i;
+        int j;
+
+        for (i = 0; dest[i] != '\0'; i++)
         {
-                dest[i] = src[i];
+        }
+        for (j = 0; src[j] != '\0'; j++, i++)
+        {
+                dest[i] = src[j];
         }
         dest[i] = '\0';
 
         return (dest);
 }
-
