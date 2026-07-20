@@ -18,6 +18,7 @@ char *rot13(char  *str)
 			if (str[i] == old[j])
 			{
 				str[i] = new[j];
+				break;
 			}
 	}
 	return (str);
