@@ -1,34 +1,59 @@
-#include "main.h"
-#include "stdio.h"
-#include "stdlib.h"
-#include "time.h"
+/*
+ * File: 101-keygen.c
+ * Auth: Brennan D Baraban
+ */
 
-int main()
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+
+/**
+ * main - Generates random valid passwords for the
+ *        program 101-crackme.
+ *
+ * Return: Always 0.
+ */
+int main(void)
 {
-	int n;
-	int excess;
-	int add;
-	int i;
-	char password[35];
+	char password[84];
+	int index = 0, sum = 0, diff_half1, diff_half2;
 
-	srand(time(NULL));
+	srand(time(0));
 
-	n = 25;
-	excess = 2772 - (97 * n);
-
-	for (i = 0; i < n; i++)
+	while (sum < 2772)
 	{
-		if (excess > 25)
-			add = 25;
-		else if (excess > 0)
-			add = excess;
-		else
-			add = 0;
-		password[i] = 'a' + add;
-		excess = excess - add;
+		password[index] = 33 + rand() % 94;
+		sum += password[index++];
 	}
-	password[n] = '\0';
 
-	printf("%s\n", password);
+	password[index] = '\0';
+
+	if (sum != 2772)
+	{
+		diff_half1 = (sum - 2772) / 2;
+		diff_half2 = (sum - 2772) / 2;
+		if ((sum - 2772) % 2 != 0)
+			diff_half1++;
+
+		for (index = 0; password[index]; index++)
+		{
+			if (password[index] >= (33 + diff_half1))
+			{
+				password[index] -= diff_half1;
+				break;
+			}
+		}
+		for (index = 0; password[index]; index++)
+		{
+			if (password[index] >= (33 + diff_half2))
+			{
+				password[index] -= diff_half2;
+				break;
+			}
+		}
+	}
+
+	printf("%s", password);
+
 	return (0);
 }
