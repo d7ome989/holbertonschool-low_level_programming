@@ -8,19 +8,21 @@ int main()
 	int excess;
 	int add;
 	int i;
-	char password[30];
+	char password[35];
 
 	srand(time(NULL));
 
-	/* عدد الأحرف بين 23 و 28، عشان يكون فيه حل صالح دايمًا */
-	n = 23 + (rand() % 6);
-
-	/* كل الأحرف تبدأ بـ 'a' (97)، والفرق نوزعه بعدين */
+	n = 25;
 	excess = 2772 - (97 * n);
 
 	for (i = 0; i < n; i++)
 	{
-		add = (excess < 25) ? excess : 25;
+		if (excess > 25)
+			add = 25;
+		else if (excess > 0)
+			add = excess;
+		else
+			add = 0;
 		password[i] = 'a' + add;
 		excess = excess - add;
 	}
