@@ -1,6 +1,7 @@
 #ifndef MAIN_H
 #define MAIN_H
 #include "stdio.h"
+void print_number(int n);
 char *rot13(char *);
 void print_diagsums(int *a, int size);
 void print_chessboard(char (*a)[8]);
