@@ -40,4 +40,10 @@ void print_dog(struct dog *d);
  */
 dog_t *new_dog(char *name, float age, char *owner);
 
+/**
+ * free_dog - Frees a dog structure and its allocated strings.
+ * @d: Pointer to the dog structure to free.
+ */
+void free_dog(dog_t *d);
+
 #endif /* DOG_H */
