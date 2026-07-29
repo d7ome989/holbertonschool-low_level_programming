@@ -45,8 +45,8 @@ void print_string(va_list ap)
 
 	str = va_arg(ap, char *);
 	if (str == NULL)
-		printf("(nil)");
-	printf("%s", str == NULL ? "" : str);
+		str = "(nil)";
+	printf("%s", str);
 }
 
 /**
@@ -65,9 +65,10 @@ void print_all(const char * const format, ...)
 		{'\0', NULL}
 	};
 	va_list ap;
-	unsigned int i, j;
+	unsigned int i, j, printed;
 
 	i = 0;
+	printed = 0;
 	va_start(ap, format);
 	while (format && format[i])
 	{
@@ -75,7 +76,12 @@ void print_all(const char * const format, ...)
 		while (table[j].type != '\0')
 		{
 			if (table[j].type == format[i])
+			{
+				if (printed)
+					printf(", ");
 				table[j].f(ap);
+				printed = 1;
+			}
 			j++;
 		}
 		i++;
