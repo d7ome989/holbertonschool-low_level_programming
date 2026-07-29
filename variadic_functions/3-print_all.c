@@ -42,11 +42,12 @@ void print_float(va_list ap)
 void print_string(va_list ap)
 {
 	char *str;
+	char *options[2];
 
 	str = va_arg(ap, char *);
-	if (str == NULL)
-		str = "(nil)";
-	printf("%s", str);
+	options[0] = str;
+	options[1] = "(nil)";
+	printf("%s", options[str == NULL]);
 }
 
 /**
