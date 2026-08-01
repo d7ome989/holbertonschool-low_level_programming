@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>مسابقة كرة القدم - الجلسة</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: 'Tahoma', 'Arial', sans-serif;
+    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+    color: #fff;
+    min-height: 100vh;
+  }
+  .hidden { display: none !important; }
+  .container { max-width: 1300px; margin: 0 auto; padding: 20px; }
+
+  /* شاشة إضافة الفرق */
+  #setupScreen {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    min-height: 100vh; text-align: center;
+  }
+  #setupScreen h1 { font-size: 2.5em; margin-bottom: 10px; color: #ffd700; }
+  #setupScreen p { font-size: 1.1em; color: #ccc; margin-bottom: 25px; }
+  .teamInputRow { display: flex; gap: 10px; margin-bottom: 15px; align-items: center; }
+  .teamInputRow input {
+    padding: 12px; font-size: 1.1em; border-radius: 8px; border: none;
+    width: 250px; text-align: right;
+  }
+  .colorBox { width: 30px; height: 30px; border-radius: 50%; border: 2px solid #fff; }
+  #teamsList { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+  button {
+    cursor: pointer; border: none; border-radius: 8px; font-size: 1em;
+    padding: 12px 25px; font-weight: bold; transition: 0.2s;
+  }
+  .btnMain { background: #ffd700; color: #111; font-size: 1.2em; }
+  .btnMain:hover { background: #ffea70; transform: scale(1.05); }
+  .btnSmall { background: #444; color: #fff; padding: 8px 14px; }
+  .btnSmall:hover { background: #666; }
+  .btnDanger { background: #c0392b; color: #fff; padding: 8px 14px; }
+
+  /* شاشة اللعبة */
+  #gameScreen { display: none; }
+  .scoreboard {
+    display: flex; justify-content: center; gap: 15px; flex-wrap: wrap;
+    margin: 15px 0 30px;
+  }
+  .teamCard {
+    background: rgba(255,255,255,0.1);
+    border-radius: 12px; padding: 15px 25px; text-align: center;
+    min-width: 150px; border: 3px solid transparent;
+  }
+  .teamCard .tname { font-size: 1.3em; font-weight: bold; margin-bottom: 5px; }
+  .teamCard .tscore { font-size: 2em; font-weight: bold; color: #ffd700; }
+
+  .categoryBlock { margin-bottom: 30px; }
+  .categoryTitle {
+    font-size: 1.8em; text-align: center; margin-bottom: 15px;
+    background: rgba(0,0,0,0.3); padding: 10px; border-radius: 10px;
+  }
+  .questionGrid {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
+  }
+  .qBtn {
+    background: linear-gradient(145deg, #1e5799, #2989d8);
+    color: #fff; font-size: 1.6em; padding: 25px; border-radius: 10px;
+  }
+  .qBtn:disabled { background: #2c2c2c; color: #555; cursor: not-allowed; }
+  .qBtn:not(:disabled):hover { transform: scale(1.05); }
+
+  /* شاشة السؤال المنبثقة */
+  #questionModal {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.92);
+    display: none; align-items: center; justify-content: center; flex-direction: column;
+    text-align: center; padding: 40px; z-index: 999;
+  }
+  #questionModal .catTag {
+    background: #ffd700; color: #111; padding: 6px 20px; border-radius: 20px;
+    font-weight: bold; margin-bottom: 20px; font-size: 1.2em;
+  }
+  #questionText { font-size: 2.6em; font-weight: bold; max-width: 1000px; margin-bottom: 40px; line-height: 1.4; }
+  #answerText {
+    font-size: 2.2em; color: #2ecc71; font-weight: bold; margin-bottom: 40px; display: none;
+  }
+  .modalActions { display: flex; gap: 15px; flex-wrap: wrap; justify-content: center; }
+  #awardSection { display: none; margin-top: 20px; flex-wrap: wrap; gap: 12px; justify-content: center; }
+  .awardBtn {
+    background: #27ae60; color: #fff; font-size: 1.1em; padding: 12px 20px;
+  }
+  .awardBtn.noone { background: #7f8c8d; }
+
+  @media (max-width: 800px) {
+    .questionGrid { grid-template-columns: repeat(2, 1fr); }
+    #questionText { font-size: 1.6em; }
+    #answerText { font-size: 1.4em; }
+  }
+</style>
+</head>
+<body>
+
+<!-- شاشة إعداد الفرق -->
+<div id="setupScreen" class="container">
+  <h1>🏆 مسابقة كرة القدم</h1>
+  <p>أضف أسماء الفرق (أو الأعضاء) اللي راح يلعبون في الجلسة</p>
+  <div id="teamsList"></div>
+  <div class="teamInputRow">
+    <input type="text" id="newTeamName" placeholder="اسم الفريق مثلاً: نمور النصر">
+    <button class="btnSmall" onclick="addTeam()">➕ إضافة فريق</button>
+  </div>
+  <button class="btnMain" onclick="startGame()">🚀 بدء المسابقة</button>
+</div>
+
+<!-- شاشة اللعبة -->
+<div id="gameScreen" class="container">
+  <h1 style="text-align:center; color:#ffd700;">🏆 مسابقة كرة القدم</h1>
+  <div class="scoreboard" id="scoreboard"></div>
+  <div id="categoriesContainer"></div>
+  <div style="text-align:center; margin-top:20px;">
+    <button class="btnDanger" onclick="resetAll()">🔄 إعادة تعيين المسابقة</button>
+  </div>
+</div>
+
+<!-- المودال: السؤال -->
+<div id="questionModal">
+  <div class="catTag" id="modalCategory"></div>
+  <div id="questionText"></div>
+  <div id="answerText"></div>
+  <div class="modalActions">
+    <button class="btnMain" id="showAnswerBtn" onclick="showAnswer()">👁️ عرض الإجابة</button>
+    <button class="btnSmall" onclick="closeModal()">❌ إغلاق</button>
+  </div>
+  <div id="awardSection"></div>
+</div>
+
+<script>
+let teams = [];
+const teamColors = ["#e74c3c","#3498db","#2ecc71","#f1c40f","#9b59b6","#1abc9c","#e67e22","#34495e"];
+
+const defaultTeams = ["فريق الصقور", "فريق النسور"];
+
+function renderTeamsList() {
+  const list = document.getElementById('teamsList');
+  list.innerHTML = '';
+  teams.forEach((t, i) => {
+    const row = document.createElement('div');
+    row.className = 'teamInputRow';
+    row.innerHTML = `
+      <div class="colorBox" style="background:${t.color}"></div>
+      <span style="font-size:1.2em; min-width:200px;">${t.name}</span>
+      <button class="btnDanger" onclick="removeTeam(${i})">🗑️ حذف</button>
+    `;
+    list.appendChild(row);
+  });
+}
+
+function addTeam(name) {
+  const input = document.getElementById('newTeamName');
+  const teamName = name || input.value.trim();
+  if (!teamName) return;
+  teams.push({ name: teamName, score: 0, color: teamColors[teams.length % teamColors.length] });
+  input.value = '';
+  renderTeamsList();
+}
+
+function removeTeam(i) {
+  teams.splice(i, 1);
+  renderTeamsList();
+}
+
+defaultTeams.forEach(n => addTeam(n));
+
+function startGame() {
+  if (teams.length < 2) { alert('أضف فريقين على الأقل!'); return; }
+  document.getElementById('setupScreen').style.display = 'none';
+  document.getElementById('gameScreen').style.display = 'block';
+  renderScoreboard();
+  renderCategories();
+}
+
+function renderScoreboard() {
+  const sb = document.getElementById('scoreboard');
+  sb.innerHTML = '';
+  teams.forEach((t, i) => {
+    const card = document.createElement('div');
+    card.className = 'teamCard';
+    card.style.borderColor = t.color;
+    card.innerHTML = `<div class="tname" style="color:${t.color}">${t.name}</div><div class="tscore" id="score-${i}">${t.score}</div>`;
+    sb.appendChild(card);
+  });
+}
+
+// بنك الأسئلة
+const categories = [
+  {
+    name: "⚽ الدوري السعودي للمحترفين",
+    questions: [
+      { points: 100, q: "أي نادي تُوّج بلقب دوري روشن السعودي لموسم 2025-2026؟", a: "نادي النصر" },
+      { points: 200, q: "كم بلغ عدد نقاط النصر في ختام موسم 2025-2026 التي حسم بها اللقب؟", a: "86 نقطة" },
+      { points: 300, q: "من هو هداف دوري روشن السعودي لموسم 2025-2026 برصيد 33 هدفاً؟", a: "خوليان كينونيس (مهاجم القادسية)" },
+      { points: 400, q: "أي نادي كان حامل لقب الدوري السعودي قبل تتويج النصر في موسم 2025-2026؟", a: "نادي الاتحاد (بطل موسم 2024-2025)" },
+      { points: 200, q: "من هو النجم البرتغالي الذي يلعب لنادي النصر وسجّل 28 هدفاً في دوري روشن موسم 2025-2026؟", a: "كريستيانو رونالدو" },
+      { points: 300, q: "أي نادي حل وصيفاً للنصر في ترتيب دوري روشن موسم 2025-2026 برصيد 84 نقطة؟", a: "نادي الهلال" },
+      { points: 100, q: "ما هو الاسم التجاري (الراعي) الحالي للدوري السعودي للمحترفين؟", a: "دوري روشن السعودي" },
+      { points: 400, q: "أي لاعب أهلاوي جاء ثانياً في سباق الهدافين موسم 2025-2026 برصيد 32 هدفاً؟", a: "إيفان توني" }
+    ]
+  },
+  {
+    name: "🌍 كرة القدم العالمية",
+    questions: [
+      { points: 100, q: "كم عدد اللاعبين الأساسيين لكل فريق في مباراة كرة القدم (بدون الحارس)؟", a: "10 لاعبين + حارس المرمى = 11" },
+      { points: 200, q: "أي منتخب فاز بكأس العالم 2022 في قطر؟", a: "الأرجنتين" },
+      { points: 300, q: "من هو صاحب لقب 'الكرة الذهبية' لأكثر مرات في التاريخ (8 مرات)؟", a: "ليونيل ميسي" },
+      { points: 400, q: "أي دولة ستستضيف كأس العالم 2026؟", a: "الولايات المتحدة، كندا، والمكسيك (استضافة مشتركة)" },
+      { points: 100, q: "ما هو عدد الأشواط الرسمية في مباراة كرة القدم؟", a: "شوطان (45 دقيقة لكل شوط)" },
+      { points: 200, q: "أي نادٍ إسباني يُعرف بلقب 'الميرنغي'؟", a: "ريال مدريد" },
+      { points: 300, q: "من هو مدرب المنتخب السعودي الحالي؟", a: "هيرفي رينارد سابقاً، تأكد من المدرب الحالي عند وقت طرح السؤال" },
+      { points: 400, q: "أي بطولة قارية يشارك فيها المنتخب السعودي كل 4 سنوات باسم 'كأس آسيا'؟", a: "كأس آسيا لكرة القدم" }
+    ]
+  },
+  {
+    name: "🧠 ثقافة عامة",
+    questions: [
+      { points: 100, q: "ما هي عاصمة المملكة العربية السعودية؟", a: "الرياض" },
+      { points: 200, q: "كم عدد الكواكب في المجموعة الشمسية؟", a: "8 كواكب" },
+      { points: 300, q: "من هو مؤلف رواية 'ألف ليلة وليلة'؟ (تراث شعبي بدون مؤلف واحد)", a: "عمل تراثي جماعي شعبي" },
+      { points: 400, q: "ما هو أطول نهر في العالم؟", a: "نهر النيل (أو الأمازون حسب بعض القياسات الحديثة)" },
+      { points: 100, q: "كم عدد أيام السنة الكبيسة؟", a: "366 يوماً" },
+      { points: 200, q: "ما هي أكبر قارة من حيث المساحة؟", a: "قارة آسيا" },
+      { points: 300, q: "في أي مدينة سعودية يقع المسجد النبوي؟", a: "المدينة المنورة" },
+      { points: 400, q: "ما اسم أول قمر صناعي أُطلق إلى الفضاء؟", a: "سبوتنيك 1 (Sputnik 1)" }
+    ]
+  }
+];
+
+let currentQuestion = null;
+let currentBtn = null;
+
+function renderCategories() {
+  const container = document.getElementById('categoriesContainer');
+  container.innerHTML = '';
+  categories.forEach((cat, ci) => {
+    const block = document.createElement('div');
+    block.className = 'categoryBlock';
+    const title = document.createElement('div');
+    title.className = 'categoryTitle';
+    title.innerText = cat.name;
+    block.appendChild(title);
+
+    const grid = document.createElement('div');
+    grid.className = 'questionGrid';
+    cat.questions.forEach((q, qi) => {
+      const btn = document.createElement('button');
+      btn.className = 'qBtn';
+      btn.innerText = q.points;
+      btn.onclick = () => openQuestion(cat, q, btn);
+      grid.appendChild(btn);
+    });
+    block.appendChild(grid);
+    container.appendChild(block);
+  });
+}
+
+function openQuestion(cat, q, btn) {
+  if (btn.disabled) return;
+  currentQuestion = q;
+  currentBtn = btn;
+  document.getElementById('modalCategory').innerText = cat.name + " - " + q.points + " نقطة";
+  document.getElementById('questionText').innerText = q.q;
+  document.getElementById('answerText').style.display = 'none';
+  document.getElementById('answerText').innerText = "الإجابة: " + q.a;
+  document.getElementById('showAnswerBtn').style.display = 'inline-block';
+  document.getElementById('awardSection').style.display = 'none';
+  document.getElementById('questionModal').style.display = 'flex';
+}
+
+function showAnswer() {
+  document.getElementById('answerText').style.display = 'block';
+  document.getElementById('showAnswerBtn').style.display = 'none';
+  renderAwardSection();
+}
+
+function renderAwardSection() {
+  const section = document.getElementById('awardSection');
+  section.innerHTML = '';
+  teams.forEach((t, i) => {
+    const b = document.createElement('button');
+    b.className = 'awardBtn';
+    b.style.background = t.color;
+    b.innerText = "✅ " + t.name;
+    b.onclick = () => awardPoints(i);
+    section.appendChild(b);
+  });
+  const none = document.createElement('button');
+  none.className = 'awardBtn noone';
+  none.innerText = "❌ لم يجاوب أحد";
+  none.onclick = () => awardPoints(-1);
+  section.appendChild(none);
+  section.style.display = 'flex';
+}
+
+function awardPoints(teamIndex) {
+  if (teamIndex >= 0) {
+    teams[teamIndex].score += currentQuestion.points;
+    document.getElementById('score-' + teamIndex).innerText = teams[teamIndex].score;
+  }
+  if (currentBtn) currentBtn.disabled = true;
+  closeModal();
+}
+
+function closeModal() {
+  document.getElementById('questionModal').style.display = 'none';
+}
+
+function resetAll() {
+  if (!confirm('هل تريد إعادة تعيين المسابقة بالكامل؟')) return;
+  location.reload();
+}
+</script>
+
+</body>
+</html>
