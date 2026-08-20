@@ -6,50 +6,59 @@
 #include <unistd.h>
 
 /**
- * copy_file - copies the content of one file to another
+ * copy_file - copies content from one file to another
  * @fd_from: source file descriptor
  * @fd_to: destination file descriptor
- * @name: destination file name
+ * @from: source file name
+ * @to: destination file name
  *
  * Return: 0 on success, 98 on read error, 99 on write error
  */
-int copy_file(int fd_from, int fd_to, char *name)
+int copy_file(int fd_from, int fd_to, char *from, char *to)
 {
 	char buffer[1024];
-	int r;
-	int w;
-	int total;
+	int r, w, total;
 
 	r = read(fd_from, buffer, 1024);
-
 	while (r > 0)
 	{
 		total = 0;
-
 		while (total < r)
 		{
 			w = write(fd_to, buffer + total, r - total);
-
 			if (w == -1)
 			{
 				dprintf(STDERR_FILENO,
-					"Error: Can't write to %s\n", name);
+					"Error: Can't write to %s\n", to);
 				return (99);
 			}
-
 			total += w;
 		}
-
 		r = read(fd_from, buffer, 1024);
 	}
-
 	if (r == -1)
 	{
 		dprintf(STDERR_FILENO,
-			"Error: Can't read from file %s\n", name);
+			"Error: Can't read from file %s\n", from);
 		return (98);
 	}
+	return (0);
+}
 
+/**
+ * close_file - closes a file descriptor
+ * @fd: file descriptor
+ *
+ * Return: 0 on success, 100 on failure
+ */
+int close_file(int fd)
+{
+	if (close(fd) == -1)
+	{
+		dprintf(STDERR_FILENO,
+			"Error: Can't close fd %d\n", fd);
+		return (100);
+	}
 	return (0);
 }
 
@@ -62,15 +71,13 @@ int copy_file(int fd_from, int fd_to, char *name)
  */
 int main(int argc, char **argv)
 {
-	int fd_from;
-	int fd_to;
+	int fd_from, fd_to, result;
 
 	if (argc != 3)
 	{
 		dprintf(STDERR_FILENO, "Usage: cp file_from file_to\n");
 		return (97);
 	}
-
 	fd_from = open(argv[1], O_RDONLY);
 	if (fd_from == -1)
 	{
@@ -78,43 +85,26 @@ int main(int argc, char **argv)
 			"Error: Can't read from file %s\n", argv[1]);
 		return (98);
 	}
-
 	fd_to = open(argv[2], O_WRONLY | O_CREAT | O_TRUNC, 0664);
 	if (fd_to == -1)
 	{
 		dprintf(STDERR_FILENO,
 			"Error: Can't write to %s\n", argv[2]);
-
-		if (close(fd_from) == -1)
-		{
-			dprintf(STDERR_FILENO,
-				"Error: Can't close fd %d\n", fd_from);
-			return (100);
-		}
-
+		close_file(fd_from);
 		return (99);
 	}
-
-	if (copy_file(fd_from, fd_to, argv[2]) != 0)
+	result = copy_file(fd_from, fd_to, argv[1], argv[2]);
+	if (result != 0)
 	{
-		close(fd_from);
-		close(fd_to);
-		return (99);
+		close_file(fd_from);
+		close_file(fd_to);
+		return (result);
 	}
-
-	if (close(fd_from) == -1)
+	result = close_file(fd_from);
+	if (result != 0)
 	{
-		dprintf(STDERR_FILENO,
-			"Error: Can't close fd %d\n", fd_from);
-		return (100);
+		close_file(fd_to);
+		return (result);
 	}
-
-	if (close(fd_to) == -1)
-	{
-		dprintf(STDERR_FILENO,
-			"Error: Can't close fd %d\n", fd_to);
-		return (100);
-	}
-
-	return (0);
+	return (close_file(fd_to));
 }
