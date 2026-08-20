@@ -1,7 +1,12 @@
-#include "main.h"
+#define _POSIX_C_SOURCE 200809L
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <fcntl.h>
+#include <unistd.h>
 
 /**
- * main - copies the content of one file to another file
+ * main - copies the content of a file to another file
  * @argc: number of arguments
  * @argv: arguments
  *
@@ -12,6 +17,7 @@ int main(int argc, char **argv)
 	int fd_from, fd_to;
 	int r, w;
 	int close_from, close_to;
+	int total;
 	char buffer[1024];
 
 	if (argc != 3)
@@ -23,15 +29,22 @@ int main(int argc, char **argv)
 	fd_from = open(argv[1], O_RDONLY);
 	if (fd_from == -1)
 	{
-		dprintf(STDERR_FILENO, "Error: Can't read from file %s\n", argv[1]);
+		dprintf(STDERR_FILENO,
+			"Error: Can't read from file %s\n", argv[1]);
 		return (98);
 	}
 
 	fd_to = open(argv[2], O_WRONLY | O_CREAT | O_TRUNC, 0664);
 	if (fd_to == -1)
 	{
-		dprintf(STDERR_FILENO, "Error: Can't write to %s\n", argv[2]);
-		close(fd_from);
+		dprintf(STDERR_FILENO,
+			"Error: Can't write to %s\n", argv[2]);
+		if (close(fd_from) == -1)
+		{
+			dprintf(STDERR_FILENO,
+				"Error: Can't close fd %d\n", fd_from);
+			return (100);
+		}
 		return (99);
 	}
 
@@ -39,14 +52,22 @@ int main(int argc, char **argv)
 
 	while (r > 0)
 	{
-		w = write(fd_to, buffer, r);
+		total = 0;
 
-		if (w == -1 || w != r)
+		while (total < r)
 		{
-			dprintf(STDERR_FILENO, "Error: Can't write to %s\n", argv[2]);
-			close(fd_from);
-			close(fd_to);
-			return (99);
+			w = write(fd_to, buffer + total, r - total);
+
+			if (w == -1)
+			{
+				dprintf(STDERR_FILENO,
+					"Error: Can't write to %s\n", argv[2]);
+				close(fd_from);
+				close(fd_to);
+				return (99);
+			}
+
+			total += w;
 		}
 
 		r = read(fd_from, buffer, 1024);
@@ -54,7 +75,8 @@ int main(int argc, char **argv)
 
 	if (r == -1)
 	{
-		dprintf(STDERR_FILENO, "Error: Can't read from file %s\n", argv[1]);
+		dprintf(STDERR_FILENO,
+			"Error: Can't read from file %s\n", argv[1]);
 		close(fd_from);
 		close(fd_to);
 		return (98);
@@ -63,14 +85,16 @@ int main(int argc, char **argv)
 	close_from = close(fd_from);
 	if (close_from == -1)
 	{
-		dprintf(STDERR_FILENO, "Error: Can't close fd %d\n", fd_from);
+		dprintf(STDERR_FILENO,
+			"Error: Can't close fd %d\n", fd_from);
 		return (100);
 	}
 
 	close_to = close(fd_to);
 	if (close_to == -1)
 	{
-		dprintf(STDERR_FILENO, "Error: Can't close fd %d\n", fd_to);
+		dprintf(STDERR_FILENO,
+			"Error: Can't close fd %d\n", fd_to);
 		return (100);
 	}
 
